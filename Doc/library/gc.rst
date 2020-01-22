@@ -35,7 +35,7 @@ The :mod:`gc` module provides the following functions:
 
 .. function:: isenabled()
 
-   Returns true if automatic collection is enabled.
+   Return ``True`` if automatic collection is enabled.
 
 
 .. function:: collect(generation=2)
@@ -175,6 +175,27 @@ The :mod:`gc` module provides the following functions:
       True
 
    .. versionadded:: 3.1
+
+
+.. function:: is_finalized(obj)
+
+   Returns ``True`` if the given object has been finalized by the
+   garbage collector, ``False`` otherwise. ::
+
+      >>> x = None
+      >>> class Lazarus:
+      ...     def __del__(self):
+      ...         global x
+      ...         x = self
+      ...
+      >>> lazarus = Lazarus()
+      >>> gc.is_finalized(lazarus)
+      False
+      >>> del lazarus
+      >>> gc.is_finalized(x)
+      True
+
+   .. versionadded:: 3.9
 
 
 .. function:: freeze()

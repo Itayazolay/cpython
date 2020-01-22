@@ -956,14 +956,9 @@ class EnvironTests(mapping_tests.BasicTestMappingProtocol):
     # On OS X < 10.6, unsetenv() doesn't return a value (bpo-13415).
     @support.requires_mac_ver(10, 6)
     def test_unset_error(self):
-        if sys.platform == "win32":
-            # an environment variable is limited to 32,767 characters
-            key = 'x' * 50000
-            self.assertRaises(ValueError, os.environ.__delitem__, key)
-        else:
-            # "=" is not allowed in a variable name
-            key = 'key='
-            self.assertRaises(OSError, os.environ.__delitem__, key)
+        # "=" is not allowed in a variable name
+        key = 'key='
+        self.assertRaises(OSError, os.environ.__delitem__, key)
 
     def test_key_type(self):
         missing = 'missingkey'
@@ -4047,6 +4042,17 @@ class TestPEP519(unittest.TestCase):
         # __fspath__ raises an exception.
         self.assertRaises(ZeroDivisionError, self.fspath,
                           FakePath(ZeroDivisionError()))
+
+    def test_pathlike_subclasshook(self):
+        # bpo-38878: subclasshook causes subclass checks
+        # true on abstract implementation.
+        class A(os.PathLike):
+            pass
+        self.assertFalse(issubclass(FakePath, A))
+        self.assertTrue(issubclass(FakePath, os.PathLike))
+
+    def test_pathlike_class_getitem(self):
+        self.assertIs(os.PathLike[bytes], os.PathLike)
 
 
 class TimesTests(unittest.TestCase):
